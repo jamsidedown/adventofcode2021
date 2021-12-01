@@ -8,15 +8,12 @@ let readInput (filepath:string) =
 
 let countIncreases (depths:array<int>) =
     depths
-    |> Array.windowed 2
-    |> Array.sumBy (fun arr ->
-        match arr with
-        | [| x; y |] when y > x -> 1
-        | _ -> 0)
+    |> Array.pairwise
+    |> Array.where(fun (x, y) -> y > x)
+    |> Array.length
 
 let partOne (depths:array<int>) =
-    depths
-    |> countIncreases
+    countIncreases depths
 
 assert (partOne testInput = 7)
 
