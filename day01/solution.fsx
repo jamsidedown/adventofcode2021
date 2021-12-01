@@ -2,7 +2,7 @@ open System.IO
 
 let testInput = [| 199; 200; 208; 210; 200; 207; 240; 269; 260; 263; |]
 
-let readInput filepath =
+let readInput (filepath:string) =
     File.ReadAllLines filepath
     |> Array.map int
 
@@ -15,6 +15,23 @@ let partOne (depths:array<int>) =
 
 assert (partOne testInput = 7)
 
+let partTwo (depths:array<int>) =
+    depths
+    |> Array.windowed 3
+    |> Array.map Array.sum
+    |> Array.windowed 2
+    |> Array.map (fun arr ->
+        match arr with
+        | [| x; y |] ->
+            match x, y with
+            | x, y when y > x -> 1
+            | _ -> 0
+        | _ -> 0)    
+    |> Array.sum
+
+assert (partTwo testInput = 5)
+
 let input = readInput "day01/input.txt"
 
 printfn $"{partOne input}"
+printfn $"{partTwo input}"
