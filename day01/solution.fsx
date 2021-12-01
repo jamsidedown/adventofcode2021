@@ -11,10 +11,7 @@ let countIncreases (depths:array<int>) =
     |> Array.windowed 2
     |> Array.sumBy (fun arr ->
         match arr with
-        | [| x; y |] ->
-            match x, y with
-            | x, y when y > x -> 1
-            | _ -> 0
+        | [| x; y |] when y > x -> 1
         | _ -> 0)
 
 let partOne (depths:array<int>) =
