@@ -18,8 +18,16 @@ Any tests I write will likely just be asserts in each solution file.
 
 How to run the solution file for each day depends on the language.
 
+### F#
+
 For F# solutions `dotnet fsi dayXX/solution.fsx`
 
+For F# solutions including assertions `dotnet fsi -d:DEBUG dayXX/solution.fsx`
+
+### C#
+
 For C# solutions `dotnet script dayXX/solution.csx`
+
+### Python
 
 For Python solutions `python dayXX/solution.py`
