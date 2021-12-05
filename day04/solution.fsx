@@ -1,4 +1,5 @@
 open System.IO
+open System
 
 type CardNumber =
     | Uncalled of int
@@ -11,8 +12,7 @@ let readInput (filepath:string) =
         lines[2..]
         |> Array.filter (fun line -> line.Length > 0)
         |> Array.map (fun line ->
-            line.Split ' '
-            |> Array.filter (fun split -> split.Length > 0)
+            line.Split(' ', StringSplitOptions.RemoveEmptyEntries)
             |> Array.map int
             |> Array.map Uncalled)
         |> Array.chunkBySize 5

@@ -1,8 +1,5 @@
 open System
 open System.IO
-open System.Text.RegularExpressions
-
-let pattern = Regex @"^(\d+),(\d+) -> (\d+),(\d+)$"
 
 type Coord = { X:int ; Y:int }
 type Line = { Start:Coord; Stop:Coord }
@@ -13,13 +10,9 @@ type GridPosition =
 let readInput filepath =
     File.ReadAllLines filepath
     |> Array.map (fun line ->
-        match pattern.Match line with
-        | m when m.Success ->
-            let groups = m.Groups |> Seq.map (fun g -> g.Value) |> Seq.toArray
-            match groups with
-            | [| _; x1; y1; x2; y2 |] ->
-                Some { Start={ X=(int x1); Y=(int y1) }; Stop={ X=(int x2); Y=(int y2) } }
-            | _ -> None
+        match  line.Split([| " -> "; "," |], StringSplitOptions.None) with
+        | [| x1; y1; x2; y2 |] ->
+            Some { Start={ X=(int x1); Y=(int y1) }; Stop={ X=(int x2); Y=(int y2) } }
         | _ -> None)
     |> Array.choose id
 
