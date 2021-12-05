@@ -22,18 +22,6 @@ let isHorizontal (line:Line) =
 let isVertical (line:Line) =
     line.Start.X = line.Stop.X
 
-let rec limits (lines:list<Line>) =
-    match lines with
-    | l :: ls ->
-        let lx = Math.Max(l.Start.X, l.Stop.X)
-        let ly = Math.Max(l.Start.Y, l.Stop.Y)
-        let nl = limits ls
-        { nl with
-            X=(Math.Max(lx, nl.X));
-            Y=(Math.Max(ly, nl.Y))
-        }
-    | _ -> { X=0; Y=0 }
-
 let range (start:int) (stop:int) =
     match start with
     | start when start <= stop -> [| start..stop |]
@@ -59,14 +47,10 @@ let expand (line:Line) =
     | _ -> [||]
 
 let generateGrid (input:array<Line>) =
-    input
-    |> Array.toList
-    |> limits
-    |> fun max ->
-        [| 0..max.X |]
-        |> Array.map (fun _ ->
-            [| 0..max.Y |]
-            |> Array.map (fun _ -> Uncrossed))
+    [| 0..999 |]
+    |> Array.map (fun _ ->
+        [| 0..999 |]
+        |> Array.map (fun _ -> Uncrossed))
 
 let partOne (input:array<Line>) =
     let filteredInput =
