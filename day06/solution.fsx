@@ -4,21 +4,7 @@ open System.IO
 
 let testInput = [| 3; 4; 3; 1; 2 |]
 
-let partOne (days:int) (input:array<int>) =
-    let rec inner (days:int) (input:array<int>) =
-        match days with
-        | 0 -> input
-        | n ->
-            input
-            |> Array.collect (fun elem ->
-                match elem with
-                | 0 -> [| 6; 8 |]
-                | x -> [| x - 1 |])
-            |> inner (n - 1)
-    inner days input
-    |> Array.length
-
-let partTwo (days:int) (input:array<int>) =
+let run (days:int) (input:array<int>) =
     let cache = new Dictionary<int*int, int64>()
 
     let rec inner (days:int) (fish:int) =
@@ -36,18 +22,22 @@ let partTwo (days:int) (input:array<int>) =
                 cache[key] <- next
                 next
 
-    input
-    |> Array.sumBy (inner days)
+    input |> Array.sumBy (inner days)
 
-assert (partOne 18 testInput = 26)
-assert (partOne 80 testInput = 5934)
+let partOne (input:array<int>) =
+    run 80 input
 
-assert (partTwo 256 testInput = 26984457539L)
+let partTwo (input:array<int>) =
+    run 256 input
+
+assert (run 18 testInput = 26)
+assert (partOne testInput = 5934)
+assert (partTwo testInput = 26984457539L)
 
 let input =
     File.ReadAllText "day06/input.txt"
     |> (fun s -> s.Split(',', StringSplitOptions.RemoveEmptyEntries))
     |> Array.map int
 
-printfn $"{partOne 80 input}"
-printfn $"{partTwo 256 input}"
+printfn $"{partOne input}"
+printfn $"{partTwo input}"
