@@ -2,16 +2,14 @@ open System
 open System.Collections.Generic
 open System.IO
 
-let testInput = [| 3; 4; 3; 1; 2 |]
-
 let run (days:int) (input:array<int>) =
     let cache = new Dictionary<int*int, int64>()
 
     let rec inner (days:int) (fish:int) =
-        let key = (days, fish)
         match days with
         | 0 -> 1L
         | _ -> 
+            let key = (days, fish)
             match cache.ContainsKey key with
             | true -> cache[key]
             | false ->
@@ -29,6 +27,8 @@ let partOne (input:array<int>) =
 
 let partTwo (input:array<int>) =
     run 256 input
+
+let testInput = [| 3; 4; 3; 1; 2 |]
 
 assert (run 18 testInput = 26)
 assert (partOne testInput = 5934)
