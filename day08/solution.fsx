@@ -22,33 +22,26 @@ let partOne (input:array<array<string>*array<string>>) =
         |> Array.length)
 
 let solveLine (line:array<string>*array<string>) =
-    let one = fst line |> Array.filter (fun word -> word.Length = 2) |> Array.head |> Set.ofSeq
-    let seven = fst line |> Array.filter (fun word -> word.Length = 3) |> Array.head |> Set.ofSeq
-    let four = fst line |> Array.filter (fun word -> word.Length = 4) |> Array.head |> Set.ofSeq
-    let eight = fst line |> Array.filter (fun word -> word.Length = 7) |> Array.head |> Set.ofSeq
+    let words = fst line |> Array.map Set.ofSeq
 
-    let topSegment = Set.difference seven one |> Set.toArray |> Array.head
+    let one = words |> Array.filter (fun word -> word.Count = 2) |> Array.head
+    let four = words |> Array.filter (fun word -> word.Count = 4) |> Array.head
+    let seven = words |> Array.filter (fun word -> word.Count = 3) |> Array.head
+    let eight = words |> Array.filter (fun word -> word.Count = 7) |> Array.head
 
-    let zeroSixNine = fst line |> Array.filter (fun word -> word.Length = 6) |> Array.map Set.ofSeq
-    let nine =
-        zeroSixNine
-        |> Array.filter (fun word -> Set.difference word (Set.add topSegment four) |> Set.count = 1)
-        |> Array.head
+    let zeroSixNine = words |> Array.filter (fun word -> word.Count = 6)
+    let twoThreeFive = words |> Array.filter (fun word -> word.Count = 5)
+
+    let three = twoThreeFive |> Array.filter (Set.isSubset one) |> Array.head
+    let nine = zeroSixNine |> Array.filter (Set.isSubset three) |> Array.head
+
+    let twoFive = twoThreeFive |> Array.filter (fun word -> word <> three)
+    let five = twoFive |> Array.filter (Set.isSuperset nine) |> Array.head
+    let two = twoFive |> Array.filter (fun word -> word <> five) |> Array.head
 
     let zeroSix = zeroSixNine |> Array.filter (fun word -> word <> nine)
-    let zero = zeroSix |> Array.filter (fun word -> Set.difference one word |> Set.count = 0) |> Array.head
+    let zero = zeroSix |> Array.filter (Set.isSubset one) |> Array.head
     let six = zeroSix |> Array.filter (fun word -> word <> zero) |> Array.head
-
-    let bottomLeftSegment = Set.difference eight nine |> Set.toArray |> Array.head
-    let topRightSegment = Set.difference eight six |> Set.toArray |> Array.head
-    let bottomRightSegment = one |> Set.remove topRightSegment |> Set.toArray |> Array.head
-
-    let twoThreeFive = fst line |> Array.filter (fun word -> word.Length = 5) |> Array.map Set.ofSeq
-    let five = eight |> Set.remove bottomLeftSegment |> Set.remove topRightSegment
-
-    let twoThree = twoThreeFive |> Array.filter (fun word -> word <> five)
-    let three = twoThree |> Array.filter (fun word -> word.Contains bottomRightSegment) |> Array.head
-    let two = twoThree |> Array.filter (fun word -> word <> three) |> Array.head
 
     let lookup =
         [(zero, "0"); (one, "1"); (two, "2"); (three, "3"); (four, "4");
