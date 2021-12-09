@@ -1,8 +1,5 @@
 open System.IO
-
-type PointType =
-    | Point of int
-    | Lowpoint of int
+open System.Collections.Generic
 
 let readInput (filepath:string) =
     File.ReadAllLines filepath
@@ -11,41 +8,72 @@ let readInput (filepath:string) =
         |> Seq.toArray
         |> Array.map (string >> int))
 
-let partOne (input:array<array<int>>) =
-    let mutable points = input |> Array.map (fun row -> row |> Array.map Point)
-
+let neighbours (points:array<array<int>>) =
     let height = points.Length
     let width = points[0].Length
 
-    for x in [| 0..(height-1) |] do
-        for y in [| 0..(width-1) |] do
-            let current =
-                match points[x][y] with
-                | Point n -> n
-                | Lowpoint n -> n
+    [| 0..(height-1) |]
+    |> Array.collect (fun x ->
+        [| 0..(width-1) |]
+        |> Array.map (fun y ->
             [| (x-1, y); (x+1, y); (x, y-1); (x, y+1) |]
             |> Array.filter (fun (x, y) -> x >= 0 && y >= 0)
             |> Array.filter (fun (x, y) -> x < height && y < width)
-            |> Array.map (fun (x, y) -> points[x][y])
-            |> Array.map (fun point ->
-                match point with
-                | Point n -> n
-                | Lowpoint n -> n)
-            |> Array.filter (fun n -> n <= current)
-            |> function
-                | [||] -> points[x][y] <- Lowpoint current
-                | _ -> ()
+            |> fun arr -> ((x, y), arr)))
+    |> dict
 
-    points
-    |> Array.sumBy (fun row ->
-        row
-        |> Array.sumBy (fun cell ->
-            match cell with
-            | Lowpoint n -> n + 1
-            | _ -> 0))
+let isLowest (points:array<array<int>>) (current:int*int) (ns:array<int*int>) =
+    ns
+    |> Array.filter (fun (x, y) -> points[x][y] <= points[fst current][snd current])
+    |> Array.length = 0
+
+let lowPoints (points:array<array<int>>) =
+    neighbours points
+    |> Seq.filter (fun pair -> isLowest points pair.Key pair.Value)
+
+let partOne (points:array<array<int>>) =
+    lowPoints points
+    |> Seq.sumBy (fun pair ->
+        let (x, y) = pair.Key
+        points[x][y] + 1)
+
+let basin (points:array<array<int>>) (target:int*int) =
+    let ns = neighbours points
+    let mutable basin = Set.ofList [ target ]
+
+    let includes (coords:array<int*int>) =
+        coords
+        |> Array.filter (fun coord -> not (basin.Contains coord))
+        |> Array.filter (fun (x, y) -> points[x][y] < 9)
+
+    let rec recurse (current:int*int) : list<int*int> =
+        let point = points[fst current][snd current]
+        let neighbours = includes ns[current] |> Array.filter (fun (x, y) -> points[x][y] > point)
+
+        match neighbours with
+        | [||] -> []
+        | _ ->
+            neighbours
+            |> Array.filter (fun n -> isLowest points n (includes ns[n]))
+            |> Array.toList
+            |> List.collect (fun n ->
+                basin <- basin.Add n
+                n :: recurse n)
+
+    target :: recurse target
+
+let partTwo (points:array<array<int>>) =
+    lowPoints points
+    |> Seq.map (fun pair -> basin points pair.Key)
+    |> Seq.map List.length
+    |> Seq.sortDescending
+    |> Seq.take 3
+    |> Seq.reduce (*)
 
 let testInput = readInput "day09/testInput.txt"
 assert (partOne testInput = 15)
+assert (partTwo testInput = 1134)
 
 let input = readInput "day09/input.txt"
 printfn $"{partOne input}"
+printfn $"{partTwo input}"
