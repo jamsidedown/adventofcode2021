@@ -1,5 +1,4 @@
 open System.IO
-open System.Collections.Generic
 
 let readInput (filepath:string) =
     File.ReadAllLines filepath
@@ -22,14 +21,13 @@ let neighbours (points:array<array<int>>) =
             |> fun arr -> ((x, y), arr)))
     |> dict
 
-let isLowest (points:array<array<int>>) (current:int*int) (ns:array<int*int>) =
-    ns
-    |> Array.filter (fun (x, y) -> points[x][y] <= points[fst current][snd current])
-    |> Array.length = 0
-
 let lowPoints (points:array<array<int>>) =
     neighbours points
-    |> Seq.filter (fun pair -> isLowest points pair.Key pair.Value)
+    |> Seq.filter (fun pair ->
+        let (x, y) = pair.Key
+        let p = points[x][y]
+        pair.Value
+        |> Array.forall (fun (xx, yy) -> points[xx][yy] > p))
 
 let partOne (points:array<array<int>>) =
     lowPoints points
@@ -38,19 +36,18 @@ let partOne (points:array<array<int>>) =
         points[x][y] + 1)
 
 let basin (points:array<array<int>>) (target:int*int) =
-    let ns = neighbours points
-    let mutable basin = Set.ofList [ target ]
-
-    let includes (coords:array<int*int>) =
-        coords
-        |> Array.filter (fun coord -> not (basin.Contains coord))
-        |> Array.filter (fun (x, y) -> points[x][y] < 9)
-        |> Array.toList
+    let pointNeighbours = neighbours points
+    let mutable exclude = Set.ofList [ target ]
 
     let rec recurse (current:int*int) : list<int*int> =
-        let point = points[fst current][snd current]
-        let currentNeighbours = includes ns[current] |> List.filter (fun (x, y) -> points[x][y] > point)
-        basin <- Set.union basin (Set.ofList currentNeighbours)
+        let currentNeighbours =
+            pointNeighbours[current]
+            |> Array.filter (fun c -> exclude.Contains c |> not)
+            |> Array.filter (fun (x, y) -> points[x][y] < 9)
+            |> Array.toList
+
+        exclude <- currentNeighbours |> Set.ofList |> Set.union exclude
+
         currentNeighbours |> List.collect (fun n -> n :: recurse n)
 
     target :: recurse target
