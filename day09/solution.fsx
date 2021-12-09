@@ -45,20 +45,13 @@ let basin (points:array<array<int>>) (target:int*int) =
         coords
         |> Array.filter (fun coord -> not (basin.Contains coord))
         |> Array.filter (fun (x, y) -> points[x][y] < 9)
+        |> Array.toList
 
     let rec recurse (current:int*int) : list<int*int> =
         let point = points[fst current][snd current]
-        let neighbours = includes ns[current] |> Array.filter (fun (x, y) -> points[x][y] > point)
-
-        match neighbours with
-        | [||] -> []
-        | _ ->
-            neighbours
-            |> Array.filter (fun n -> isLowest points n (includes ns[n]))
-            |> Array.toList
-            |> List.collect (fun n ->
-                basin <- basin.Add n
-                n :: recurse n)
+        let currentNeighbours = includes ns[current] |> List.filter (fun (x, y) -> points[x][y] > point)
+        basin <- Set.union basin (Set.ofList currentNeighbours)
+        currentNeighbours |> List.collect (fun n -> n :: recurse n)
 
     target :: recurse target
 
