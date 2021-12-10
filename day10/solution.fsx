@@ -8,8 +8,7 @@ type Line =
 let readInput (filepath:string) =
     File.ReadAllLines filepath
 
-let closing = [(')', '('); ('}', '{'); (']', '['); ('>', '<')] |> dict
-let opening = [('(', ')'); ('[', ']'); ('{', '}'); ('<', '>')] |> dict
+let brackets = [('(', ')'); ('[', ']'); ('{', '}'); ('<', '>')] |> dict
 let opens = Set.ofList ['('; '{'; '['; '<']
 let closes = Set.ofList [')'; '}'; ']'; '>']
 let corruptScores = [(')', 3); (']', 57); ('}', 1197); ('>', 25137)] |> dict
@@ -25,7 +24,7 @@ let parseLine (line:string) =
             recurse cs
         | c :: cs when closes.Contains c ->
             match stack with
-            | lc :: _ when closing[c] = lc ->
+            | lc :: _ when brackets[lc] = c ->
                 stack <- stack.Tail
                 recurse cs
             | _ -> Corrupted c
@@ -35,7 +34,6 @@ let parseLine (line:string) =
             | _ -> Incomplete stack
 
     line |> Seq.toList |> recurse
-
 
 let partOne (input:array<string>) =
     input
@@ -48,7 +46,7 @@ let partOne (input:array<string>) =
 let rec complete (input:list<char>) =
     match input with
     | [] -> []
-    | c :: cs -> opening[c] :: complete cs
+    | c :: cs -> brackets[c] :: complete cs
 
 let partTwo (input:array<string>) =
     let scores =
