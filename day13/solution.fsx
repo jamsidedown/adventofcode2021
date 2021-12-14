@@ -65,7 +65,7 @@ let pprint (coords: array<int*int>) =
             |> Array.map (fun x ->
                 match lookup.Contains (x, y) with
                 | true -> "#"
-                | false -> ".")
+                | false -> " ")
             |> String.concat "")
     for line in grid do
         printfn "%s" line
