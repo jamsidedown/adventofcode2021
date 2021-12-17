@@ -70,8 +70,6 @@ let rec parsePacket (input:list<char>) =
                 (operator :: packets, tail)
             | _ -> ([], [])
     | _ -> ([], [])
-and parseOperator (input:list<char>) =
-    
 
 let partOne (input:string) =
     let rec recurse (packet:Packet) =
